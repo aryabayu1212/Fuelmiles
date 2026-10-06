@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0f1114">
+<title>FuelMiles</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+<main>
+  <section id="home" class="screen on">
+    <div class="head"><div><h1>FuelMiles</h1><p>Ringkasan kendaraan</p></div><button class="ibtn" onclick="openTx()" aria-label="Catat pengeluaran">＋</button></div>
+    <div id="switch" class="switch"></div><div id="hero"></div>
+    <div id="dash">
+      <div class="card kpi"><div class="lbl">Biaya kendaraan / km</div><div class="val big" id="hCpk"></div><div class="note" id="hCpkN"></div></div>
+      <div class="row2">
+        <div class="card tap" onclick="show('maint')"><div class="lbl">Kesehatan perawatan</div><div class="val" id="hHealth"></div><div class="note" id="hHealthN"></div></div>
+        <div class="card tap" onclick="show('stats')"><div class="lbl">Dana cadangan</div><div class="val" id="hRes"></div><div class="note" id="hResN"></div></div>
+      </div>
+      <div class="card tap" onclick="show('maint')"><div class="lbl">Perawatan berikutnya</div><div class="val" id="hNext"></div><div class="note" id="hNextN"></div></div>
+      <div class="card tap" onclick="openUse()"><div class="lbl">Kilometer harian</div><div class="val" id="hDaily"></div><div class="note" id="hDailyN"></div></div>
+      <div class="card"><div class="lbl">Proyeksi perawatan 30 hari</div><div class="val" id="hProj"></div><div class="note" id="hProjN"></div></div>
+    </div>
+  </section>
+
+  <section id="garage" class="screen">
+    <div class="head"><div><h1>Kendaraan</h1><p>Garasi dan profil motor</p></div></div>
+    <div id="gVeh"></div>
+    <button class="btn ghost" onclick="openBike()">＋ Tambah motor</button>
+  </section>
+
+  <section id="stats" class="screen">
+    <div class="head"><div><h1>Keuangan</h1><p>Biaya, dana cadangan, dan proyeksi</p></div></div>
+    <div class="row2">
+      <div class="card" style="margin:0"><div class="lbl">Total servis</div><div class="val" id="sN">0</div></div>
+      <div class="card" style="margin:0"><div class="lbl">Total biaya</div><div class="val" id="sC">Rp 0</div></div>
+    </div>
+    <div class="card" style="margin-top:10px"><div class="lbl">Biaya per km</div><div class="val" id="sK">Belum ada data</div><div class="note">Butuh odometer dan biaya servis. Tidak ada angka yang dikarang.</div></div>
+    <div class="card"><div class="lbl">Sinking fund harian (proyeksi)</div><div class="val big" id="sSF">Belum ada data</div><div class="note" id="sSFn"></div><div class="hist" id="sSFb" style="margin-top:10px"></div></div>
+    <div class="sec"><h2>Pengeluaran &amp; dana</h2><button class="chip acc" onclick="openTx()">＋ Catat</button></div><div id="txList"></div>
+  </section>
+
+  <section id="maint" class="screen">
+    <div class="head"><div><h1>Perawatan</h1><p>Komponen dan riwayat servis</p></div></div>
+    <div class="sec" style="margin-top:0"><h2>Timeline</h2><div class="seg"><button id="tlK" class="chip acc" onclick="setTL('km')">KM</button><button id="tlC" class="chip" onclick="setTL('cal')">Kalender</button></div></div>
+    <div id="tl"></div>
+    <div class="sec"><h2>Komponen</h2><button class="chip acc" onclick="openModal('partModal')">＋ Tambah</button></div>
+    <div id="parts"></div>
+    <div class="sec"><h2>Riwayat servis</h2><button class="chip acc" onclick="openModal('serviceModal')">＋ Catat</button></div>
+    <div id="svcList"></div>
+  </section>
+
+  <section id="profile" class="screen">
+    <div class="head"><div><h1>Pengaturan</h1><p>Data tersimpan lokal di perangkat ini</p></div></div>
+    <div class="card"><b>Data aplikasi</b><div class="note">FuelMiles tidak mengisi motor, odometer, atau sparepart otomatis. Kamu yang menentukan datanya.</div></div>
+    <div class="card"><b>Palet tema</b><div class="sw" id="sw"></div><div class="note" id="swn"></div></div>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-s="home" onclick="show('home')"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7M6 10v10h12V10"/></svg>Beranda</button>
+  <button data-s="garage" onclick="show('garage')"><svg viewBox="0 0 24 24"><circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9L8 6H6"/></svg>Kendaraan</button>
+  <button data-s="maint" onclick="show('maint')"><svg viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 4.9 4.9L20 12l-8 8a2.1 2.1 0 0 1-3-3l8-8z M14 7l3 3"/></svg>Perawatan</button>
+  <button data-s="stats" onclick="show('stats')"><svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>Keuangan</button>
+  <button data-s="profile" onclick="show('profile')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Setelan</button>
+</nav>
+</div>
+
+<div class="modal" id="bikeModal"><div class="sheet"><div class="grab"></div><h2 id="bikeTitle">Motor</h2>
+<div class="pic" id="pic" onclick="bikePhoto.click()"><span>Tambah foto motor</span></div><input type="file" id="bikePhoto" accept="image/*" hidden>
+<form onsubmit="saveBike(event)">
+  <div class="r2"><div><label>Pabrikan</label><select id="bikeBrand"></select></div><div><label>Model</label><select id="bikeModel"><option value="">Pilih model...</option></select></div></div>
+  <label>Nama motor</label><input id="bikeName" placeholder="Pilih model di atas atau ketik sendiri" required>
+  <div class="r2"><div><label>Tahun</label><input id="bikeYear" type="number" inputmode="numeric" placeholder="2025"></div><div><label>Plat (opsional)</label><input id="bikePlate" placeholder="B 1234 XYZ"></div></div>
+  <label>Odometer saat ini (km)</label><input id="bikeKm" type="number" inputmode="numeric" min="0" required>
+  <label>Odometer awal pelacakan (opsional)</label><input id="bikeStart" type="number" inputmode="numeric" min="0" placeholder="Km saat mulai mencatat">
+  <div class="note" style="margin:-4px 0 14px">Dasar hitung biaya/km. Kosong = biaya/km belum bisa dihitung (motor baru: otomatis = odometer saat ini).</div>
+  <label>Rata-rata km per hari (opsional)</label><input id="bikeDaily" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Contoh: 25 (boleh dikosongkan)">
+  <div class="note" style="margin:-4px 0 14px">Berapa rata-rata kilometer yang kamu tempuh setiap hari? Dipakai untuk estimasi waktu servis, dana cadangan, dan proyeksi. Boleh dikosongkan: estimasi tanggal dinonaktifkan sampai ada data, tidak dikarang. Nanti bisa diganti catatan odometer harian.</div>
+  <button class="btn">Simpan motor</button>
+</form></div></div>
+
+<div class="modal" id="partModal"><div class="sheet"><div class="grab"></div><h2>Tambah sparepart</h2>
+<form onsubmit="savePart(event)">
+  <label>Sparepart</label><select id="partCat" required></select>
+  <div id="partCustomGroup" style="display:none;margin-bottom:12px">
+    <label>Nama Sparepart Custom</label>
+    <input id="partCustomName" placeholder="Contoh: Lampu Utama / Klakson">
+    <label>Kategori</label>
+    <select id="partCustomCat">
+      <option value="Mesin">Mesin</option>
+      <option value="Pengapian">Pengapian</option>
+      <option value="Rem">Rem</option>
+      <option value="Drivetrain">Drivetrain</option>
+      <option value="Clutch">Clutch</option>
+      <option value="Pendingin">Pendingin</option>
+      <option value="CVT">CVT</option>
+      <option value="Ban">Ban</option>
+      <option value="Kelistrikan">Kelistrikan</option>
+      <option value="Lainnya" selected>Lainnya</option>
+    </select>
+  </div>
+  <div id="catInfo" class="note" style="margin:-4px 0 13px"></div>
+  <div class="r2"><div><label>Dipasang pada km</label><input id="partKm" type="number" inputmode="numeric" min="0" required></div><div><label>Interval ganti (km)</label><input id="partInt" type="number" inputmode="numeric" min="1" required></div></div>
+  <div class="r2"><div><label>Harga (opsional, Rp)</label><input id="partCost" type="number" inputmode="numeric" min="0" placeholder="0 (opsional)"></div><div><label>Catatan / Merek (opsional)</label><input id="partNote" placeholder="Merek / detail"></div></div>
+  <button class="btn">Tambah sparepart</button>
+</form></div></div>
+
+<div class="modal" id="compModal"><div class="sheet" id="compBody"></div></div>
+
+<div class="modal" id="serviceModal"><div class="sheet"><div class="grab"></div><h2 id="svcTitle">Catat servis</h2>
+<form onsubmit="saveService(event)">
+  <label>Jenis servis</label><input id="svcName" placeholder="Contoh: Ganti oli" required>
+  <div class="r2"><div><label>Odometer (km)</label><input id="svcKm" type="number" inputmode="numeric" min="0" required></div><div><label>Biaya (Rp)</label><input id="svcCost" type="number" inputmode="numeric" min="0" required></div></div>
+  <label>Tanggal</label><input id="svcDate" type="date" required>
+  <label>Catatan (opsional)</label><input id="svcNote" placeholder="Bengkel, merek part, dll.">
+  <button class="btn">Simpan servis</button>
+</form></div></div>
+
+<div class="modal" id="txModal"><div class="sheet"><div class="grab"></div><h2>Catat pengeluaran</h2>
+<form onsubmit="saveTx(event)">
+  <label>Jenis</label><select id="txType"><option value="fuel">BBM</option><option value="tax">Pajak</option><option value="insurance">Asuransi</option><option value="other">Lainnya</option><option value="reserve_in">Setor dana cadangan</option><option value="reserve_out">Tarik dana cadangan</option></select>
+  <div class="r2"><div><label>Jumlah (Rp)</label><input id="txAmt" type="number" inputmode="numeric" min="1" required></div><div><label>Tanggal</label><input id="txDate" type="date" required></div></div>
+  <label>Odometer saat ini (km, opsional)</label><input id="txOdo" type="number" inputmode="numeric" min="0">
+  <div class="note" style="margin:-4px 0 14px">Perbarui agar jarak tercatat dan biaya/km bisa dihitung.</div>
+  <label>Catatan (opsional)</label><input id="txNote">
+  <button class="btn">Simpan</button>
+</form></div></div>
+
+<div class="modal" id="useModal"><div class="sheet"><div class="grab"></div><h2>Tambah kilometer harian</h2>
+<form onsubmit="saveUse(event)" oninput="useWarned=false;useBtn.textContent='Simpan'">
+  <label>Yang kamu isi</label><select id="useMode" onchange="useHint()"><option value="odo">Odometer hari ini</option><option value="dist">Jarak tempuh hari ini</option></select>
+  <label id="useLbl">Odometer hari ini (km)</label><input id="useVal" type="number" inputmode="decimal" min="0" step="0.1" required>
+  <label>Tanggal</label><input id="useDate" type="date" required>
+  <div class="err" id="useErr" role="alert"></div>
+  <button class="btn" id="useBtn">Simpan</button>
+</form></div></div>
+
+<div id="welcome"><div class="wm">FuelMiles</div><div class="odo" id="wOdo"></div><p>Catat servis, pantau umur sparepart, dan hitung dana perawatan motormu. Semua data tersimpan di HP ini.</p><button class="btn" onclick="skipW=1;render();openBike()">Mulai</button><button class="skip" onclick="skipW=1;render()">Lewati dulu</button></div>
+<div class="toast" id="toast"></div>
+
+<script src="store.js"></script>
+<script src="calc.js"></script>
+<script src="home.js"></script>
+<script src="comp.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
